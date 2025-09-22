@@ -1,0 +1,36 @@
+.container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 1rem;
+  font-family: sans-serif;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+textarea {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.results-section .counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 10px;
+  background-color: #f4f4f4;
+  border-radius: 4px;
+}
+
+.error-message {
+  color: red;
+  margin-top: 1rem;
+}
