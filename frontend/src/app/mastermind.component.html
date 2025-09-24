@@ -1,0 +1,48 @@
+<div class="container">
+  <h1>Mastermind</h1>
+  <p class="message" [ngClass]="{ 'winner': isWinner }">{{ message }}</p>
+
+  <div class="board">
+    <!-- Guess History -->
+    <div class="history">
+      <h2>Guess History</h2>
+      <div *ngIf="guessHistory.length === 0" class="no-history">No guesses yet.</div>
+      <div *ngFor="let guess of guessHistory; let i = index" class="history-row">
+        <span class="guess-number">{{ i + 1 }}.</span>
+        <div class="pegs">
+          <div *ngFor="let color of guess.pegs" class="peg" [style.backgroundColor]="color"></div>
+        </div>
+        <div class="feedback">
+          <span>Hits: {{ guess.feedback.hits }}</span>
+          <span>Blows: {{ guess.feedback.blows }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current Guess -->
+    <div class="current-guess-area">
+      <h2>Your Guess</h2>
+      <div class="pegs">
+        <div *ngFor="let color of currentGuess; let i = index" class="peg-placeholder" [style.backgroundColor]="color || 'lightgray'">
+        </div>
+      </div>
+      <button (click)="submitGuess()" [disabled]="currentGuess.includes('') || isWinner">Submit Guess</button>
+    </div>
+
+    <!-- Color Palette -->
+    <div class="palette">
+      <h2>Available Colors</h2>
+      <div class="pegs">
+        <div *ngFor="let color of availableColors" class="peg" [style.backgroundColor]="color"></div>
+      </div>
+      <p>Click a color below, then a position above to place it.</p>
+      <div class="color-picker">
+        <div *ngFor="let color of availableColors; let i = index">
+          <button class="color-option" [style.backgroundColor]="color" (click)="selectColor(color, 0)"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button (click)="startNewGame()" class="new-game-btn">Start New Game</button>
+</div>

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { LetterCounterApiService } from '../letter-counter-api.service';
+import { LetterCounterApiService } from 'frontend/letter-counter-api.service';
 
 @Component({
   selector: 'app-letter-counter',

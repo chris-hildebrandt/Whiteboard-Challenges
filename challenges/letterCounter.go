@@ -25,8 +25,7 @@ func LetterCounterHandler(w http.ResponseWriter, r *http.Request) {
 
 	input := requestData.Input
 	alphabet := "abcdefghijklmnopqrstuvwxyz"
-	// Using a map is a much better data structure for the response.
-	// It's more structured and easier for a frontend to parse.
+	
 	counts := make(map[string]int)
 
 	for i := 0; i < len(alphabet); i++ {
