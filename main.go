@@ -1,10 +1,10 @@
 package main
 
 import (
-	"whiteboard-challenges/challenges"
 	"fmt"
 	"log"
 	"net/http"
+	"whiteboard-challenges/challenges"
 )
 
 // apiHandler will be a placeholder for future API logic.
@@ -15,6 +15,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	fmt.Println(consoleGreet())
 	http.HandleFunc("/api", apiHandler)
 	http.HandleFunc("/mastermind", challenges.MastermindHandler)
 	http.HandleFunc("/letterCounter", challenges.LetterCounterHandler)
