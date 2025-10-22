@@ -1,0 +1,34 @@
+<div class="container">
+  <h1>Letter Counter Challenge</h1>
+
+  <!-- Input Area -->
+  <div class="input-section">
+    <textarea [(ngModel)]="userInput" rows="4" placeholder="Enter text here..."></textarea>
+    <button (click)="getLetterCounts()">Count Letters</button>
+  </div>
+
+  <!-- Display Area -->
+  @if (apiResponse) {
+    <div class="results-section">
+      <h2>Results for: "{{ apiResponse.input }}"</h2>
+      <div class="counts">
+        <!-- The keyvalue pipe lets us easily loop over the map from the Go backend -->
+        @for (item of apiResponse.counts | keyvalue; track item.key) {
+          <span>
+            {{ item.key }}: {{ item.value }}
+          </span>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Error Message -->
+  @if (errorMessage) {
+    <div class="error-message">
+      <p>{{ errorMessage }}</p>
+    </div>
+  }
+
+  <!-- Navigation -->
+  <button routerLink="/">Back to Main Menu</button>
+</div>

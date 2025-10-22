@@ -1,10 +1,15 @@
 import { Component } from '@angular/core';
-import { LetterCounterApiService } from 'frontend/letter-counter-api.service';
+import { LetterCounterApiService } from './letter-counter-api.service';
+import { FormsModule } from '@angular/forms';
+import { CommonModule, KeyValuePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-letter-counter',
+  standalone: true,
+  imports: [FormsModule, CommonModule, RouterLink, KeyValuePipe],
   templateUrl: './letter-counter.component.html',
-  styleUrls: ['./letter-counter.component.css']
+  styleUrls: ['./letter-counter.component.css'],
 })
 export class LetterCounterComponent {
   userInput: string = 'Hello, World!'; // Default input text

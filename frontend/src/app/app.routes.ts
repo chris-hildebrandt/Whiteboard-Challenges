@@ -10,6 +10,10 @@ export const appRoutes: Routes = [
     loadComponent: () => import('./working-hours-calculator.component').then(m => m.WorkingHoursCalculatorComponent)
   },
   {
+    path: 'letter-counter',
+    loadComponent: () => import('./letter-counter.component').then(m => m.LetterCounterComponent)
+  },
+  {
     path: '',
     redirectTo: '/working-hours',
     pathMatch: 'full'
