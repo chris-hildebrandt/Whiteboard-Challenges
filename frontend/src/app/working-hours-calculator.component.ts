@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NgIf, NgClass, DecimalPipe } from '@angular/common';
+import { NgIf, DecimalPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 interface WorkingHoursRequest {
@@ -25,7 +25,7 @@ interface WorkingHoursResponse {
 @Component({
   selector: 'app-working-hours-calculator',
   standalone: true,
-  imports: [NgIf, NgClass, FormsModule, DecimalPipe],
+  imports: [NgIf, FormsModule, DecimalPipe, DatePipe],
   templateUrl: './working-hours-calculator.component.html',
   styleUrl: './working-hours-calculator.component.css'
 })
