@@ -1,0 +1,174 @@
+<div class="container">
+  <h1>Working Hours Calculator</h1>
+  <p class="subtitle">Calculate working hours between two dates (Monday-Friday, 9 AM - 5 PM default)</p>
+
+  <div class="calculator-card">
+    <!-- Quick Range Buttons -->
+    <div class="quick-ranges">
+      <span class="quick-range-label">Quick ranges:</span>
+      <button (click)="setQuickRange(1)" class="quick-btn">1 Day</button>
+      <button (click)="setQuickRange(3)" class="quick-btn">3 Days</button>
+      <button (click)="setQuickRange(7)" class="quick-btn">1 Week</button>
+      <button (click)="setQuickRange(14)" class="quick-btn">2 Weeks</button>
+    </div>
+
+    <!-- Date/Time Input Section -->
+    <div class="datetime-section">
+      <div class="datetime-group">
+        <label for="start-date">Start Date & Time</label>
+        <div class="datetime-inputs">
+          <input 
+            type="date" 
+            id="start-date" 
+            [(ngModel)]="startDate" 
+            class="date-input"
+          />
+          <input 
+            type="time" 
+            [(ngModel)]="startTime" 
+            class="time-input"
+          />
+        </div>
+      </div>
+
+      <div class="datetime-group">
+        <label for="end-date">End Date & Time</label>
+        <div class="datetime-inputs">
+          <input 
+            type="date" 
+            id="end-date" 
+            [(ngModel)]="endDate" 
+            class="date-input"
+          />
+          <input 
+            type="time" 
+            [(ngModel)]="endTime" 
+            class="time-input"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Advanced Options Toggle -->
+    <div class="advanced-toggle">
+      <button (click)="toggleAdvancedOptions()" class="toggle-btn">
+        {{ showAdvancedOptions ? '▼' : '▶' }} Advanced Options
+      </button>
+    </div>
+
+    <!-- Advanced Options Panel -->
+    <div class="advanced-options" *ngIf="showAdvancedOptions">
+      <h3>Working Hours Configuration</h3>
+      
+      <div class="options-grid">
+        <div class="option-group">
+          <label for="work-start">Work Start Hour (0-23)</label>
+          <input 
+            type="number" 
+            id="work-start" 
+            [(ngModel)]="workStartHour" 
+            min="0" 
+            max="23"
+            class="hour-input"
+          />
+        </div>
+
+        <div class="option-group">
+          <label for="work-end">Work End Hour (0-23)</label>
+          <input 
+            type="number" 
+            id="work-end" 
+            [(ngModel)]="workEndHour" 
+            min="0" 
+            max="23"
+            class="hour-input"
+          />
+        </div>
+      </div>
+
+      <div class="lunch-section">
+        <div class="checkbox-group">
+          <input 
+            type="checkbox" 
+            id="deduct-lunch" 
+            [(ngModel)]="deductLunch"
+          />
+          <label for="deduct-lunch">Deduct lunch break</label>
+        </div>
+
+        <div class="options-grid" *ngIf="deductLunch">
+          <div class="option-group">
+            <label for="lunch-start">Lunch Start Hour (0-23)</label>
+            <input 
+              type="number" 
+              id="lunch-start" 
+              [(ngModel)]="lunchStartHour" 
+              min="0" 
+              max="23"
+              class="hour-input"
+            />
+          </div>
+
+          <div class="option-group">
+            <label for="lunch-end">Lunch End Hour (0-23)</label>
+            <input 
+              type="number" 
+              id="lunch-end" 
+              [(ngModel)]="lunchEndHour" 
+              min="0" 
+              max="23"
+              class="hour-input"
+            />
+          </div>
+        </div>
+      </div>
+
+      <button (click)="resetToDefaults()" class="reset-btn">Reset to Defaults</button>
+    </div>
+
+    <!-- Calculate Button -->
+    <button 
+      (click)="calculateWorkingHours()" 
+      [disabled]="isCalculating"
+      class="calculate-btn"
+    >
+      {{ isCalculating ? 'Calculating...' : 'Calculate Working Hours' }}
+    </button>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="errorMessage">
+      ⚠️ {{ errorMessage }}
+    </div>
+
+    <!-- Results Section -->
+    <div class="results" *ngIf="result">
+      <h2>Results</h2>
+      
+      <div class="result-card primary">
+        <div class="result-label">Total Working Hours</div>
+        <div class="result-value">{{ result.workingHours | number:'1.2-2' }} hours</div>
+      </div>
+
+      <div class="results-grid">
+        <div class="result-card">
+          <div class="result-label">Working Days</div>
+          <div class="result-value-small">{{ result.workingDays }}</div>
+        </div>
+
+        <div class="result-card">
+          <div class="result-label">Total Days</div>
+          <div class="result-value-small">{{ result.totalDays }}</div>
+        </div>
+
+        <div class="result-card" *ngIf="deductLunch && result.lunchDeducted > 0">
+          <div class="result-label">Lunch Deducted</div>
+          <div class="result-value-small">{{ result.lunchDeducted | number:'1.2-2' }} hours</div>
+        </div>
+      </div>
+
+      <div class="result-details">
+        <p><strong>Period:</strong> {{ result.startTime | date:'short' }} to {{ result.endTime | date:'short' }}</p>
+      </div>
+    </div>
+  </div>
+</div>

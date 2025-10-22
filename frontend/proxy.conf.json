@@ -3,5 +3,15 @@
     "target": "http://localhost:8080",
     "secure": false,
     "pathRewrite": { "^/api": "" }
+  },
+  "/api/mastermind": {
+    "target": "http://localhost:8080",
+    "secure": false,
+    "pathRewrite": { "^/api": "" }
+  },
+  "/api/workingHoursCalculator": {
+    "target": "http://localhost:8080",
+    "secure": false,
+    "pathRewrite": { "^/api": "" }
   }
 }

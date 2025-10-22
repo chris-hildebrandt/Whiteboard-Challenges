@@ -19,6 +19,7 @@ func main() {
 	http.HandleFunc("/api", apiHandler)
 	http.HandleFunc("/mastermind", challenges.MastermindHandler)
 	http.HandleFunc("/letterCounter", challenges.LetterCounterHandler)
+	http.HandleFunc("/workingHoursCalculator", challenges.WorkingHoursCalculatorHandler)
 	fmt.Println("Starting server on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

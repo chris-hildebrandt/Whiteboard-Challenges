@@ -6,7 +6,11 @@ export const appRoutes: Routes = [
     loadComponent: () => import('./mastermind.component').then(m => m.MastermindComponent)
   },
   {
+    path: 'working-hours',
+    loadComponent: () => import('./working-hours-calculator.component').then(m => m.WorkingHoursCalculatorComponent)
+  },
+  {
     path: '',
-    redirectTo: '/mastermind',
+    redirectTo: '/working-hours',
     pathMatch: 'full'
   }];
