@@ -2,23 +2,22 @@ package challenges
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"time"
 )
 
-// WorkingHoursRequest defines the structure for calculating working hours
-type WorkingHoursRequest struct {
-	StartTime        string  `json:"startTime"`
-	EndTime          string  `json:"endTime"`
-	WorkStartHour    int     `json:"workStartHour"`    // Default: 9
-	WorkEndHour      int     `json:"workEndHour"`      // Default: 17 (5 PM)
-	LunchStartHour   int     `json:"lunchStartHour"`   // Default: 12
-	LunchEndHour     int     `json:"lunchEndHour"`     // Default: 13 (1 PM)
-	DeductLunch      bool    `json:"deductLunch"`      // Default: false
+type WorkedHoursRequest struct {
+	StartTime      string `json:"startTime"`
+	EndTime        string `json:"endTime"`
+	WorkStartHour  int    `json:"workStartHour"`
+	WorkEndHour    int    `json:"workEndHour"`
+	LunchStartHour int    `json:"lunchStartHour"`
+	LunchEndHour   int    `json:"lunchEndHour"`
+	DeductLunch    bool   `json:"deductLunch"`
 }
 
-// WorkingHoursResponse defines the response structure
 type WorkingHoursResponse struct {
 	StartTime     string  `json:"startTime"`
 	EndTime       string  `json:"endTime"`
@@ -28,75 +27,37 @@ type WorkingHoursResponse struct {
 	LunchDeducted float64 `json:"lunchDeducted"`
 }
 
-// WorkingHoursCalculatorHandler handles requests to calculate working hours
 func WorkingHoursCalculatorHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Only POST method is allowed", http.StatusMethodNotAllowed)
 		return
 	}
-
-	var requestData WorkingHoursRequest
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Error reading request body", http.StatusInternalServerError)
-		return
-	}
 	defer r.Body.Close()
 
-	if err := json.Unmarshal(body, &requestData); err != nil {
-		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
-		return
-	}
-
-	// Set defaults if not provided
-	if requestData.WorkStartHour == 0 {
-		requestData.WorkStartHour = 9
-	}
-	if requestData.WorkEndHour == 0 {
-		requestData.WorkEndHour = 17
-	}
-	if requestData.LunchStartHour == 0 {
-		requestData.LunchStartHour = 12
-	}
-	if requestData.LunchEndHour == 0 {
-		requestData.LunchEndHour = 13
-	}
-
-	// Parse the datetime strings
-	startTime, err := time.Parse("2006-01-02T15:04:05", requestData.StartTime)
+	reqData, err := parseRequest(r.Body)
 	if err != nil {
-		http.Error(w, "Invalid start time format. Use ISO 8601 format: 2006-01-02T15:04:05", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	endTime, err := time.Parse("2006-01-02T15:04:05", requestData.EndTime)
+	start, end, err := parseTimes(reqData.StartTime, reqData.EndTime)
 	if err != nil {
-		http.Error(w, "Invalid end time format. Use ISO 8601 format: 2006-01-02T15:04:05", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if endTime.Before(startTime) {
-		http.Error(w, "End time must be after start time", http.StatusBadRequest)
-		return
-	}
-
-	// Calculate working hours
 	workingHours, workingDays, lunchDeducted := calculateWorkingHours(
-		startTime,
-		endTime,
-		requestData.WorkStartHour,
-		requestData.WorkEndHour,
-		requestData.LunchStartHour,
-		requestData.LunchEndHour,
-		requestData.DeductLunch,
+		start, end,
+		reqData.WorkStartHour, reqData.WorkEndHour,
+		reqData.LunchStartHour, reqData.LunchEndHour,
+		reqData.DeductLunch,
 	)
 
-	// Calculate total days
-	totalDays := int(endTime.Sub(startTime).Hours()/24) + 1
+	totalDays := int(end.Sub(start).Hours()/24) + 1
 
 	response := WorkingHoursResponse{
-		StartTime:     requestData.StartTime,
-		EndTime:       requestData.EndTime,
+		StartTime:     reqData.StartTime,
+		EndTime:       reqData.EndTime,
 		WorkingHours:  workingHours,
 		TotalDays:     totalDays,
 		WorkingDays:   workingDays,
@@ -104,64 +65,82 @@ func WorkingHoursCalculatorHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
+}
+
+func parseRequest(body io.Reader) (WorkedHoursRequest, error) {
+	var data WorkedHoursRequest
+	if err := json.NewDecoder(body).Decode(&data); err != nil {
+		return data, errors.New("invalid JSON format")
+	}
+	return data, nil
+}
+
+func parseTimes(startStr, endStr string) (time.Time, time.Time, error) {
+	start, err := time.Parse(time.RFC3339, startStr)
+	if err != nil {
+		return time.Time{}, time.Time{}, errors.New("invalid startTime: must be ISO 8601")
+	}
+
+	end, err := time.Parse(time.RFC3339, endStr)
+	if err != nil {
+		return time.Time{}, time.Time{}, errors.New("invalid endTime: must be ISO 8601")
+	}
+
+	if end.Before(start) {
+		return time.Time{}, time.Time{}, errors.New("endTime must be after startTime")
+	}
+	return start, end, nil
 }
 
 func calculateWorkingHours(
 	start, end time.Time,
-	workStart, workEnd int,
-	lunchStart, lunchEnd int,
+	workStart, workEnd, lunchStart, lunchEnd int,
 	deductLunch bool,
-) (float64, int, float64) {
-	totalHours := 0.0
-	workingDays := 0
-	lunchDeducted := 0.0
+) (totalHours float64, workingDays int, lunchDeducted float64) {
 
-	// Iterate through each day
-	current := start
-	for current.Before(end) || current.Equal(end) {
-		// Check if it's a weekday (Monday to Friday)
-		if current.Weekday() >= time.Monday && current.Weekday() <= time.Friday {
-			dayStart := time.Date(current.Year(), current.Month(), current.Day(), workStart, 0, 0, 0, current.Location())
-			dayEnd := time.Date(current.Year(), current.Month(), current.Day(), workEnd, 0, 0, 0, current.Location())
-
-			// Determine the actual work start and end for this day
-			actualStart := maxTime(start, dayStart)
-			actualEnd := minTime(end, dayEnd)
-
-			// If there's overlap with working hours
-			if actualStart.Before(actualEnd) {
-				workingDays++
-				hours := actualEnd.Sub(actualStart).Hours()
-
-				// Deduct lunch if enabled and the day spans lunch time
-				if deductLunch {
-					lunchStartTime := time.Date(current.Year(), current.Month(), current.Day(), lunchStart, 0, 0, 0, current.Location())
-					lunchEndTime := time.Date(current.Year(), current.Month(), current.Day(), lunchEnd, 0, 0, 0, current.Location())
-
-					// Check if work hours overlap with lunch hours
-					if actualStart.Before(lunchEndTime) && actualEnd.After(lunchStartTime) {
-						// Calculate lunch overlap
-						lunchOverlapStart := maxTime(actualStart, lunchStartTime)
-						lunchOverlapEnd := minTime(actualEnd, lunchEndTime)
-						
-						if lunchOverlapStart.Before(lunchOverlapEnd) {
-							lunchHours := lunchOverlapEnd.Sub(lunchOverlapStart).Hours()
-							hours -= lunchHours
-							lunchDeducted += lunchHours
-						}
-					}
-				}
-
-				totalHours += hours
-			}
+	for day := start; !day.After(end); day = day.AddDate(0, 0, 1) {
+		if !isWeekday(day) {
+			continue
 		}
 
-		// Move to the next day
-		current = time.Date(current.Year(), current.Month(), current.Day()+1, 0, 0, 0, 0, current.Location())
-	}
+		dayStart := time.Date(day.Year(), day.Month(), day.Day(), workStart, 0, 0, 0, day.Location())
+		dayEnd := time.Date(day.Year(), day.Month(), day.Day(), workEnd, 0, 0, 0, day.Location())
 
-	return totalHours, workingDays, lunchDeducted
+		actualStart := maxTime(start, dayStart)
+		actualEnd := minTime(end, dayEnd)
+
+		if !actualStart.Before(actualEnd) {
+			continue
+		}
+
+		workingDays++
+		hours := actualEnd.Sub(actualStart).Hours()
+
+		if deductLunch {
+			lunchStartTime := time.Date(day.Year(), day.Month(), day.Day(), lunchStart, 0, 0, 0, day.Location())
+			lunchEndTime := time.Date(day.Year(), day.Month(), day.Day(), lunchEnd, 0, 0, 0, day.Location())
+			lunchHours := overlapHours(actualStart, actualEnd, lunchStartTime, lunchEndTime)
+			hours -= lunchHours
+			lunchDeducted += lunchHours
+		}
+
+		totalHours += hours
+	}
+	return
+}
+
+func isWeekday(t time.Time) bool {
+	return t.Weekday() >= time.Monday && t.Weekday() <= time.Friday
+}
+
+func overlapHours(aStart, aEnd, bStart, bEnd time.Time) float64 {
+	start := maxTime(aStart, bStart)
+	end := minTime(aEnd, bEnd)
+	if start.Before(end) {
+		return end.Sub(start).Hours()
+	}
+	return 0
 }
 
 func maxTime(a, b time.Time) time.Time {

@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NgIf, DecimalPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ApiService } from '../service/http';
 
 interface WorkingHoursRequest {
   startTime: string;
@@ -30,7 +31,7 @@ interface WorkingHoursResponse {
   styleUrl: './working-hours-calculator.component.css'
 })
 export class WorkingHoursCalculatorComponent {
-  private http = inject(HttpClient);
+  private apiService = inject(ApiService);
 
   // Form inputs
   startDate = '';
@@ -99,13 +100,13 @@ export class WorkingHoursCalculatorComponent {
       deductLunch: this.deductLunch
     };
 
-    this.http.post<WorkingHoursResponse>('/api/workingHoursCalculator', request).subscribe({
+    this.apiService.post<WorkingHoursResponse>('workingHoursCalculator', request).subscribe({
       next: (response) => {
         this.result = response;
         this.isCalculating = false;
       },
       error: (error) => {
-        this.errorMessage = error.error || 'An error occurred while calculating working hours';
+        this.errorMessage = error.message || 'An error occurred while calculating working hours';
         this.isCalculating = false;
       }
     });
