@@ -6,7 +6,7 @@
     <!-- Quick Range Buttons -->
     <div class="quick-ranges">
       <span class="quick-range-label">Quick ranges:</span>
-      <button (click)="setQuickRange(1)" class="quick-btn">1 Day</button>
+      <button (click)="setQuickRange(0)" class="quick-btn">1 Day</button>
       <button (click)="setQuickRange(3)" class="quick-btn">3 Days</button>
       <button (click)="setQuickRange(7)" class="quick-btn">1 Week</button>
       <button (click)="setQuickRange(14)" class="quick-btn">2 Weeks</button>
@@ -26,6 +26,7 @@
           <input 
             type="time" 
             [(ngModel)]="startTime" 
+            (ngModelChange)="onStartTimeChange()"
             class="time-input"
           />
         </div>
@@ -43,6 +44,7 @@
           <input 
             type="time" 
             [(ngModel)]="endTime" 
+            (ngModelChange)="onEndTimeChange()"
             class="time-input"
           />
         </div>
@@ -67,6 +69,7 @@
             type="number" 
             id="work-start" 
             [(ngModel)]="workStartHour" 
+            (ngModelChange)="onWorkStartHourChange()"
             min="0" 
             max="23"
             class="hour-input"
@@ -79,6 +82,7 @@
             type="number" 
             id="work-end" 
             [(ngModel)]="workEndHour" 
+            (ngModelChange)="onWorkEndHourChange()"
             min="0" 
             max="23"
             class="hour-input"
@@ -137,7 +141,7 @@
 
     <!-- Error Message -->
     <div class="error-message" *ngIf="errorMessage">
-      ⚠️ {{ errorMessage }}
+       {{ errorMessage }}
     </div>
 
     <!-- Results Section -->
