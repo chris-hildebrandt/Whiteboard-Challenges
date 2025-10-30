@@ -17,4 +17,9 @@ export const appRoutes: Routes = [
     path: '',
     redirectTo: '/working-hours',
     pathMatch: 'full'
-  }];
+  },
+  {
+    path: 'snarky-ai',
+    loadComponent: () => import('./snarky-ai.component').then(m => m.SnarkyAiComponent)
+  }
+];

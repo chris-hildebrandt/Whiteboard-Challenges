@@ -18,6 +18,8 @@ func main() {
 	mux.HandleFunc("/mastermind", challenges.MastermindHandler)
 	mux.HandleFunc("/letterCounter", challenges.LetterCounterHandler)
 	mux.HandleFunc("/workingHoursCalculator", challenges.WorkingHoursCalculatorHandler)
+	mux.HandleFunc("/snarky/prompt", challenges.SnarkyAIPromptHandler)
+	mux.HandleFunc("/snarky", challenges.SnarkyAIHandler)
 
 	fmt.Println("Starting server on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", mux))

@@ -1,0 +1,40 @@
+<div class="container">
+  <div class="ai-chat-container">
+    <div class="ai-header">
+      <div class="ai-avatar"></div>
+      <div class="ai-name">SnarkyAI</div>
+    </div>
+    <div class="ai-chat-box" #chatBox>
+      <div class="message ai-message" *ngIf="openingPrompt">
+        <p>{{ openingPrompt }}</p>
+      </div>
+      <div *ngFor="let msg of messages" class="message" [ngClass]="{'user-message': msg.sender === 'user', 'ai-message': msg.sender === 'ai'}">
+        <p>{{ msg.text }}</p>
+      </div>
+      <div class="message ai-message" *ngIf="isThinking">
+        <div class="typing-indicator">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+    <div class="chat-input-container">
+      <textarea 
+        #promptInput
+        class="chat-input" 
+        placeholder="Ask a stupid question..." 
+        [(ngModel)]="userInput" 
+        (keydown.enter)="sendMessage($event)">
+      </textarea>
+      <button class="send-btn" (click)="sendMessage($event)" [disabled]="isThinking">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+        </svg>
+      </button>
+    </div>
+     <div class="error-message" *ngIf="errorMessage">
+       {{ errorMessage }}
+    </div>
+  </div>
+</div>
